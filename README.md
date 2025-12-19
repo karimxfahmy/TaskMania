@@ -298,7 +298,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 👨‍💻 Author
 
-TaskMania System Monitor - A comprehensive monitoring solution built with modern technologies.
+**Karim Fahmy** – Developed as a personal project / for learning purposes
 
 ## 🙏 Acknowledgments
 
