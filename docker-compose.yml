@@ -1,0 +1,162 @@
+version: '3.8'
+
+services:
+  # InfluxDB - Time-series database
+  influxdb:
+    image: influxdb:1.8-alpine
+    container_name: taskmania-influxdb
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb
+    environment:
+      - INFLUXDB_DB=system_monitoring
+      - INFLUXDB_ADMIN_USER=admin
+      - INFLUXDB_ADMIN_PASSWORD=admin123
+      - INFLUXDB_HTTP_AUTH_ENABLED=false
+    networks:
+      - monitoring
+
+  # System Monitor - Collects system metrics
+  monitor:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.monitor
+    container_name: taskmania-monitor
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - shared-data:/app/data
+      - shared-logs:/app/logs
+      - /proc:/proc:ro
+      - /sys:/sys:ro
+    environment:
+      - MONITOR_INTERVAL=5
+      - DATA_DIR=/app/data
+      - LOG_DIR=/app/logs
+      - NVIDIA_VISIBLE_DEVICES=all
+    networks:
+      - monitoring
+    depends_on:
+      - influxdb
+    # Uncomment below for NVIDIA GPU support (requires nvidia-docker)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # Alert System - Monitors for critical events
+  alerts:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.alerts
+    container_name: taskmania-alerts
+    restart: unless-stopped
+    volumes:
+      - shared-data:/app/data
+      - shared-logs:/app/logs
+    environment:
+      - DATA_DIR=/app/data
+      - LOG_DIR=/app/logs
+      - ALERT_CONFIG=/app/config/alert_config.conf
+    networks:
+      - monitoring
+    depends_on:
+      - monitor
+
+  # Data Processor - Generates reports and summaries
+  processor:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.processor
+    container_name: taskmania-processor
+    restart: unless-stopped
+    volumes:
+      - shared-data:/app/data
+      - shared-logs:/app/logs
+      - shared-reports:/app/reports
+    environment:
+      - DATA_DIR=/app/data
+      - LOG_DIR=/app/logs
+      - REPORTS_DIR=/app/reports
+    networks:
+      - monitoring
+    depends_on:
+      - monitor
+
+  # API Server - Serves metrics to web interface
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: taskmania-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - shared-data:/app/data
+      - shared-logs:/app/logs
+      - shared-reports:/app/reports
+    environment:
+      - DATA_DIR=/app/data
+      - LOG_DIR=/app/logs
+      - REPORTS_DIR=/app/reports
+      - API_PORT=8000
+    networks:
+      - monitoring
+    depends_on:
+      - monitor
+
+  # Web Interface - React dashboard
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    container_name: taskmania-web
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - monitoring
+    depends_on:
+      - api
+
+  # Grafana - Advanced visualization (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: taskmania-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./docker/grafana-provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3001
+    networks:
+      - monitoring
+    depends_on:
+      - influxdb
+
+volumes:
+  shared-data:
+    driver: local
+  shared-logs:
+    driver: local
+  shared-reports:
+    driver: local
+  influxdb-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+networks:
+  monitoring:
+    driver: bridge

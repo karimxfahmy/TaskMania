@@ -1,0 +1,29 @@
+# Dockerfile for Alert System
+FROM alpine:latest
+
+# Install bash
+RUN apk add --no-cache bash coreutils
+
+# Create app directory
+WORKDIR /app
+
+# Copy scripts and config
+COPY scripts/alert_system.sh /app/scripts/
+COPY config/ /app/config/
+
+# Fix line endings and make script executable
+RUN apk add --no-cache dos2unix && \
+    dos2unix /app/scripts/alert_system.sh && \
+    chmod +x /app/scripts/alert_system.sh && \
+    apk del dos2unix
+
+# Create directories
+RUN mkdir -p /app/data /app/logs
+
+# Set environment variables
+ENV DATA_DIR=/app/data
+ENV LOG_DIR=/app/logs
+ENV ALERT_CONFIG=/app/config/alert_config.conf
+
+# Start alert monitoring
+CMD ["/app/scripts/alert_system.sh", "monitor"]

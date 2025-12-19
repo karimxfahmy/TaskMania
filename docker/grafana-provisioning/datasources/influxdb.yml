@@ -1,0 +1,15 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    database: system_monitoring
+    user: admin
+    secureJsonData:
+      password: admin123
+    jsonData:
+      httpMode: GET
+      timeInterval: 5s
+    editable: true

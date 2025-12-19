@@ -1,0 +1,37 @@
+# Dockerfile for System Monitor Service
+FROM alpine:latest
+
+# Install required packages
+RUN apk add --no-cache \
+    bash \
+    python3 \
+    py3-pip \
+    coreutils \
+    procps \
+    sysstat \
+    pciutils
+
+# Create app directory
+WORKDIR /app
+
+# Copy scripts
+COPY scripts/ /app/scripts/
+COPY config/ /app/config/
+
+# Fix line endings and make scripts executable
+RUN apk add --no-cache dos2unix && \
+    dos2unix /app/scripts/*.sh && \
+    chmod +x /app/scripts/*.sh && \
+    apk del dos2unix
+
+# Create directories
+RUN mkdir -p /app/data /app/logs /app/reports
+
+# Set environment variables
+ENV DATA_DIR=/app/data
+ENV LOG_DIR=/app/logs
+ENV REPORTS_DIR=/app/reports
+ENV MONITOR_INTERVAL=5
+
+# Start monitoring
+CMD ["/app/scripts/system_monitor.sh", "monitor"]

@@ -1,0 +1,133 @@
+.gpu-card {
+  width: 100%;
+}
+
+.gpu-device {
+  padding: 15px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.gpu-device:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.gpu-device:first-child {
+  padding-top: 0;
+}
+
+.gpu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.gpu-name {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gpu-name strong {
+  font-size: 1.1em;
+  color: #2d3748;
+}
+
+.gpu-vendor {
+  font-size: 0.85em;
+  color: #9b59b6;
+  font-weight: 600;
+}
+
+.gpu-health {
+  font-size: 1.5em;
+}
+
+.gpu-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gpu-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gpu-card .metric-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9em;
+}
+
+.gpu-card .metric-label span:first-child {
+  color: #718096;
+}
+
+.gpu-card .metric-value {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.gpu-card .progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.gpu-note {
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(155, 89, 182, 0.1);
+  border-radius: 4px;
+  color: #2d3748;
+  border: 1px solid rgba(155, 89, 182, 0.2);
+}
+
+.gpu-note small {
+  font-size: 0.85em;
+}
+
+.no-gpu-message {
+  text-align: center;
+  padding: 20px;
+  color: #718096;
+}
+
+.no-gpu-message p {
+  margin: 0 0 8px 0;
+  font-size: 1.1em;
+  color: #2d3748;
+}
+
+.no-gpu-message small {
+  font-size: 0.85em;
+  color: #a0aec0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .gpu-device {
+    padding: 12px 0;
+  }
+  
+  .gpu-name strong {
+    font-size: 1em;
+  }
+  
+  .metric-label {
+    font-size: 0.85em;
+  }
+}
+

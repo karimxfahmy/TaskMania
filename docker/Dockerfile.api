@@ -1,0 +1,25 @@
+# Dockerfile for API Service
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy API server
+COPY api_server.py .
+
+# Create directories
+RUN mkdir -p /app/data /app/logs /app/reports
+
+# Set environment variables
+ENV DATA_DIR=/app/data
+ENV LOG_DIR=/app/logs
+ENV REPORTS_DIR=/app/reports
+ENV API_PORT=8000
+ENV PYTHONUNBUFFERED=1
+
+EXPOSE 8000
+
+CMD ["python3", "api_server.py"]
